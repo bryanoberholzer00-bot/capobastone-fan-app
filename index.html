@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎮 Capobastone Fan App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { 
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    .section {
+      background: rgba(255,255,255,0.15);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-box .number {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-box .label {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .video-card {
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .video-card:hover {
+      transform: scale(1.05);
+    }
+    .video-card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 Capobastone</h1>
+      <p>La Fan App Ufficiale</p>
+    </div>
+
+    <div class="section">
+      <h2>📊 Statistiche Canale</h2>
+      <div class="stats">
+        <div class="stat-box">
+          <div class="number">500K+</div>
+          <div class="label">Iscritti</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">1000+</div>
+          <div class="label">Video</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">50M+</div>
+          <div class="label">Visualizzazioni</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">⭐⭐⭐⭐⭐</div>
+          <div class="label">Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📺 Link Veloci</h2>
+      <a href="https://www.youtube.com/@Capobastone" class="btn" target="_blank">
+        📺 Canale YouTube
+      </a>
+      <a href="https://www.youtube.com/@Capobastone/videos" class="btn" target="_blank">
+        🎥 Tutti i Video
+      </a>
+      <a href="https://www.youtube.com/@Capobastone/live" class="btn" target="_blank">
+        🔴 Live
+      </a>
+    </div>
+
+    <div class="section">
+      <h2>🎮 Giochi Popolari</h2>
+      <div class="video-grid">
+        <div class="video-card" onclick="openYoutube('minecraft')">
+          <div style="background: #62a462; padding: 30px; border-radius: 8px; font-size: 2em;">🧊</div>
+          <p>Minecraft</p>
+        </div>
+        <div class="video-card" onclick="openYoutube('gta')">
+          <div style="background: #ff6b6b; padding: 30px; border-radius: 8px; font-size: 2em;">🚗</div>
+          <p>GTA</p>
+        </div>
+        <div class="video-card" onclick="openYoutube('roblox')">
+          <div style="background: #ff5555; padding: 30px; border-radius: 8px; font-size: 2em;">🎮</div>
+          <p>Roblox</p>
+        </div>
+        <div class="video-card" onclick="openYoutube('horror')">
+          <div style="background: #444; padding: 30px; border-radius: 8px; font-size: 2em;">👻</div>
+          <p>Horror</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>👥 Community</h2>
+      <a href="https://t.me/" class="btn">
+        💬 Gruppo Telegram
+      </a>
+      <a href="https://discord.gg/" class="btn">
+        🎮 Server Discord
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>Mini-app creata per i fan di Capobastone</p>
+      <p>Non ufficiale - Fan Made con ❤️</p>
+    </div>
+  </div>
+
+  <script>
+    // Telegram Web App inizializzazione
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.expand();
+      Telegram.WebApp.ready();
+    }
+
+    // Funzione per aprire ricerca YouTube
+    function openYoutube(game) {
+      const searchUrl = `https://www.youtube.com/@Capobastone/search?query=${game}`;
+      window.open(searchUrl, '_blank');
+    }
+
+    // Animazione al caricamento
+    document.addEventListener('DOMContentLoaded', () => {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          section.style.transition = 'all 0.5s ease';
+          section.style.opacity = '1';
+          section.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+    });
+  </script>
+</body>
+</html>
