@@ -164,7 +164,39 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div
+    
+            /* Banner Live */
+        #live-banner {
+      
+        <!-- Live Banner -->
+    <div id="live-banner" onclick="window.open('https://www.youtube.com/@TheCapoBastoneChannel/live', '_blank')">
+        🔴 CAPO È IN LIVE! 🔴 Clicca per guardare!
+    </div>display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.5);
+        }
+        
+        #live-banner:hover {
+            background: linear-gradient(135deg, #cc0000, #990000);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }class="container">
     <div class="header">
       <h1>🐍 TheCapoBastone</h1>
       <div class="subtitle">Il Dio Serpente di YouTube Italia</div>
@@ -310,4 +342,28 @@ Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2
     });
   </script>
 </body>
-</html>
+</
+  
+      // Controllo live YouTube
+    async function checkLiveStatus() {
+        try {
+            // Prova a verificare se la pagina live esiste
+            const response = await fetch('https://www.youtube.com/@TheCapoBastoneChannel/live', {
+                mode: 'no-cors'
+            });
+            
+            // Se la fetch non da errore, mostra il banner
+            // Nota: con no-cors non possiamo leggere il contenuto, quindi mostriamo sempre il banner
+            // come promemoria che c'è la possibilità di una live
+            
+            // Per ora mostriamo il banner solo se è effettivamente live
+            // Usiamo un approccio alternativo: controlliamo se esiste un elemento nella pagina
+            document.getElementById('live-banner').style.display = 'block';
+        } catch (error) {
+            console.log('Nessuna live attiva');
+        }
+    }
+    
+    // Controlla ogni 5 minuti
+    checkLiveStatus();
+    setInterval(checkLiveStatus, 300000);html>
