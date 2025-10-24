@@ -7,17 +7,35 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
+    body {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #fff; 
+      color: #fff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
       padding: 20px;
     }
-    .container { 
-      max-width: 600px;
-      margin: 0 auto;
+    .container { max-width: 600px; margin: 0 auto; }
+
+    /* Banner Live */
+    #live-banner {
+      display: none; /* nascosto finché non lo attivi da JS */
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: linear-gradient(135deg, #ff0000, #cc0000);
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 9999;
+      animation: pulse 2s infinite;
+      box-shadow: 0 4px 15px rgba(255,0,0,0.5);
     }
+    #live-banner:hover {
+      background: linear-gradient(135deg, #cc0000, #990000);
+    }
+
     .header {
       text-align: center;
       padding: 30px 20px;
@@ -34,16 +52,9 @@
       text-shadow: 0 0 20px rgba(255,0,0,0.5);
       color: #ff3333;
     }
-    .header .subtitle {
-      font-size: 1em;
-      opacity: 0.8;
-      font-style: italic;
-    }
-    .header .since {
-      font-size: 0.9em;
-      margin-top: 10px;
-      color: #ffaa00;
-    }
+    .header .subtitle { font-size: 1em; opacity: 0.8; font-style: italic; }
+    .header .since { font-size: 0.9em; margin-top: 10px; color: #ffaa00; }
+
     .section {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
@@ -61,6 +72,7 @@
       gap: 10px;
       color: #ff6666;
     }
+
     .legendary-tag {
       display: inline-block;
       background: linear-gradient(45deg, #ff0000, #ff6600);
@@ -75,128 +87,71 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
+
     .btn {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
+      display: block; width: 100%;
+      padding: 15px; margin: 10px 0;
       background: rgba(255,50,50,0.2);
       border: 2px solid rgba(255,50,50,0.4);
       border-radius: 12px;
-      color: white;
-      text-decoration: none;
-      text-align: center;
-      font-size: 1.1em;
-      font-weight: bold;
-      transition: all 0.3s;
-      cursor: pointer;
+      color: white; text-decoration: none; text-align: center;
+      font-size: 1.1em; font-weight: bold;
+      transition: all 0.3s; cursor: pointer;
     }
     .btn:hover {
       background: rgba(255,50,50,0.4);
       transform: translateY(-2px);
       box-shadow: 0 5px 20px rgba(255,0,0,0.4);
     }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 15px;
+      gap: 15px; margin-top: 15px;
     }
     .stat-box {
       background: rgba(255,50,50,0.1);
       border: 1px solid rgba(255,50,50,0.3);
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
+      padding: 20px; border-radius: 12px; text-align: center;
     }
     .stat-box .number {
-      font-size: 1.8em;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #ff6666;
+      font-size: 1.8em; font-weight: bold; margin-bottom: 5px; color: #ff6666;
     }
-    .stat-box .label {
-      font-size: 0.9em;
-      opacity: 0.8;
-    }
+    .stat-box .label { font-size: 0.9em; opacity: 0.8; }
+
     .series-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 15px;
+      gap: 15px; margin-top: 15px;
     }
     .series-card {
       background: linear-gradient(135deg, rgba(255,50,50,0.1), rgba(100,50,150,0.1));
       border: 2px solid rgba(255,50,50,0.3);
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.3s;
+      border-radius: 10px; padding: 15px; text-align: center;
+      cursor: pointer; transition: transform 0.3s;
     }
-    .series-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255,0,0,0.4);
-    }
-    .series-card .icon {
-      font-size: 2.5em;
-      margin-bottom: 8px;
-    }
-    .series-card .title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+    .series-card:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,0,0,0.4); }
+    .series-card .icon { font-size: 2.5em; margin-bottom: 8px; }
+    .series-card .title { font-weight: bold; margin-bottom: 5px; }
+
     .quote-box {
       background: rgba(255,200,0,0.1);
       border-left: 4px solid #ffaa00;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 8px;
-      font-style: italic;
+      padding: 15px; margin: 15px 0; border-radius: 8px; font-style: italic;
     }
-    .footer {
-      text-align: center;
-      padding: 20px;
-      opacity: 0.7;
-      font-size: 0.9em;
-      margin-top: 30px;
-    }
+    .footer { text-align: center; padding: 20px; opacity: 0.7; font-size: 0.9em; margin-top: 30px; }
   </style>
 </head>
 <body>
-  <div
-    
-            /* Banner Live */
-        #live-banner {
-      
-        <!-- Live Banner -->
-    <div id="live-banner" onclick="window.open('https://www.youtube.com/@TheCapoBastoneChannel/live', '_blank')">
-        🔴 CAPO È IN LIVE! 🔴 Clicca per guardare!
-    </div>display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #ff0000, #cc0000);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 9999;
-            animation: pulse 2s infinite;
-            box-shadow: 0 4px 15px rgba(255,0,0,0.5);
-        }
-        
-        #live-banner:hover {
-            background: linear-gradient(135deg, #cc0000, #990000);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }class="container">
+  <!-- Live Banner -->
+  <div id="live-banner"
+       role="button"
+       aria-label="Apri la live su YouTube"
+       onclick="window.open('https://www.youtube.com/@TheCapoBastoneChannel/live', '_blank')">
+    🔴 CAPO È IN LIVE! 🔴 Clicca per guardare!
+  </div>
+
+  <div class="container">
     <div class="header">
       <h1>🐍 TheCapoBastone</h1>
       <div class="subtitle">Il Dio Serpente di YouTube Italia</div>
@@ -207,7 +162,7 @@
       <div class="legendary-tag">🔥 LEGGENDA STORICA</div>
       <h2>📜 Chi è Capobastone?</h2>
       <p style="line-height: 1.6; margin-bottom: 10px;">
-Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2010. Famoso per:
+        Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2010. Famoso per:
       </p>
       <ul style="line-height: 1.8; margin-left: 20px; margin-top: 10px;">
         <li>🎮 <strong>Griefing su Minecraft</strong> - Serie leggendaria</li>
@@ -253,14 +208,14 @@ Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2
           <div class="title">Era Loquendo</div>
           <div style="font-size: 0.8em; opacity: 0.8;">Voce robotica</div>
         </div>
-        <div class="series-card" onclick="openYoutube('capobastone saint row')">
+        <div class="series-card" onclick="openYoutube('capobastone saints row')">
           <div class="icon">🚗</div>
-          <div class="title">Saint's Row</div>
+          <div class="title">Saints Row</div>
           <div style="font-size: 0.8em; opacity: 0.8;">Caos totale</div>
         </div>
         <div class="series-card" onclick="openYoutube('capobastone vs favij')">
           <div class="icon">⚔️</div>
-          <div class="title">Guerre Epic</div>
+          <div class="title">Guerre Epiche</div>
           <div style="font-size: 0.8em; opacity: 0.8;">vs Altri YouTuber</div>
         </div>
       </div>
@@ -268,40 +223,40 @@ Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2
 
     <div class="section">
       <h2>📺 Canale Ufficiale</h2>
-      <a href="https://www.youtube.com/channel/UC4NNAld3re9IODZFZbOBadg" class="btn" target="_blank">
+      <a href="https://www.youtube.com/channel/UC4NNAld3re9IODZFZbOBadg" class="btn" target="_blank" rel="noopener noreferrer">
         📺 TheCapoBastone Official Channel
       </a>
-      <a href="https://www.youtube.com/channel/UC4NNAld3re9IODZFZbOBadg/videos" class="btn" target="_blank">
+      <a href="https://www.youtube.com/channel/UC4NNAld3re9IODZFZbOBadg/videos" class="btn" target="_blank" rel="noopener noreferrer">
         🎥 Tutti i Video
       </a>
-      <a href="https://www.twitch.tv/capobastoneofficial" class="btn" target="_blank">
+      <a href="https://www.twitch.tv/capobastoneofficial" class="btn" target="_blank" rel="noopener noreferrer">
         🟪 Twitch
       </a>
     </div>
 
     <div class="section">
       <h2>👥 Community</h2>
-      <a href="https://t.me/Capobastonetwitch" class="btn" target="_blank">
+      <a href="https://t.me/Capobastonetwitch" class="btn" target="_blank" rel="noopener noreferrer">
         💬 Gruppo Telegram Ufficiale
       </a>
-      <a href="https://www.facebook.com/CapobastoneOfficial" class="btn" target="_blank">
+      <a href="https://www.facebook.com/CapobastoneOfficial" class="btn" target="_blank" rel="noopener noreferrer">
         👍 Facebook Ufficiale
       </a>
-      <a href="https://www.instagram.com/capobastonecobra/" class="btn" target="_blank">
+      <a href="https://www.instagram.com/capobastonecobra/" class="btn" target="_blank" rel="noopener noreferrer">
         📸 Instagram
       </a>
     </div>
 
-            <!-- Supporta -->
-        <div class="section">
-            <h2>💰 Supporta</h2>
-            <a href="https://streamlabs.com/thecapobastonechannel" class="btn" target="_blank">
-                💸 Donazioni StreamLabs
-            </a>
-            <a href="https://www.amazon.it/hz/wishlist/ls/1LY9YRHEXB1RP" class="btn" target="_blank">
-                🎁 Wishlist Amazon
-            </a>
-        </div>
+    <!-- Supporta -->
+    <div class="section">
+      <h2>💰 Supporta</h2>
+      <a href="https://streamlabs.com/thecapobastonechannel" class="btn" target="_blank" rel="noopener noreferrer">
+        💸 Donazioni StreamLabs
+      </a>
+      <a href="https://www.amazon.it/hz/wishlist/ls/1LY9YRHEXB1RP" class="btn" target="_blank" rel="noopener noreferrer">
+        🎁 Wishlist Amazon
+      </a>
+    </div>
 
     <div class="quote-box">
       🗣️ "Ciao a tutti merdoni!" - Capobastone
@@ -315,16 +270,16 @@ Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2
   </div>
 
   <script>
-    // Telegram Web App inizializzazione
+    // Telegram Web App init
     if (window.Telegram && Telegram.WebApp) {
       Telegram.WebApp.expand();
       Telegram.WebApp.ready();
     }
 
-    // Funzione per aprire ricerca YouTube
+    // Ricerca YouTube
     function openYoutube(query) {
       const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-      window.open(searchUrl, '_blank');
+      window.open(searchUrl, '_blank', 'noopener,noreferrer');
     }
 
     // Animazione al caricamento
@@ -340,30 +295,30 @@ Capobastone è uno dei <strong>pionieri di YouTube Italia</strong>, attivo dal 2
         }, index * 150);
       });
     });
+
+    // Banner live: per attivarlo in modo manuale, imposta a true
+    const SHOW_LIVE_BANNER_MANUAL = false;
+    if (SHOW_LIVE_BANNER_MANUAL) {
+      document.getElementById('live-banner').style.display = 'block';
+    }
+
+    // Nota: il controllo "reale" dello stato live da front-end puro è limitato da CORS.
+    // Per un controllo affidabile usa un backend o la YouTube Data API (Search: eventType=live),
+    // poi mostra/nascondi il banner in base alla risposta.
+    async function checkLiveStatus() {
+      try {
+        // Placeholder: chiamata simbolica che non può leggere contenuto con no-cors
+        await fetch('https://www.youtube.com/@TheCapoBastoneChannel/live', { mode: 'no-cors' });
+        // Se arrivi qui la richiesta non è fallita, ma NON conferma che sia live.
+        // Lasciamo il banner nascosto a meno di conferma server-side/API.
+        // document.getElementById('live-banner').style.display = 'block';
+      } catch (e) {
+        console.log('Impossibile verificare lo stato live dal client:', e);
+      }
+    }
+    // Esegui se vuoi un tentativo "best effort"
+    // checkLiveStatus();
+    // setInterval(checkLiveStatus, 300000); // ogni 5 minuti
   </script>
 </body>
-</
-  
-      // Controllo live YouTube
-    async function checkLiveStatus() {
-        try {
-            // Prova a verificare se la pagina live esiste
-            const response = await fetch('https://www.youtube.com/@TheCapoBastoneChannel/live', {
-                mode: 'no-cors'
-            });
-            
-            // Se la fetch non da errore, mostra il banner
-            // Nota: con no-cors non possiamo leggere il contenuto, quindi mostriamo sempre il banner
-            // come promemoria che c'è la possibilità di una live
-            
-            // Per ora mostriamo il banner solo se è effettivamente live
-            // Usiamo un approccio alternativo: controlliamo se esiste un elemento nella pagina
-            document.getElementById('live-banner').style.display = 'block';
-        } catch (error) {
-            console.log('Nessuna live attiva');
-        }
-    }
-    
-    // Controlla ogni 5 minuti
-    checkLiveStatus();
-    setInterval(checkLiveStatus, 300000);html>
+</html>
