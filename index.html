@@ -13,27 +13,38 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
       padding: 20px;
+      padding-top: 56px; /* per non far coprire il contenuto dal banner fisso */
     }
     .container { max-width: 600px; margin: 0 auto; }
 
-    /* Banner Live */
-    #live-banner {
-      display: none; /* nascosto finché non lo attivi da JS */
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      background: linear-gradient(135deg, #ff0000, #cc0000);
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 9999;
-      animation: pulse 2s infinite;
-      box-shadow: 0 4px 15px rgba(255,0,0,0.5);
+    /* Banner Live: sempre visibile, cambia colore con lo stato */
+    #live-banner{
+      display:block;
+      position:fixed; top:0; left:0; right:0;
+      background: linear-gradient(135deg,#333846,#262b39); /* OFFLINE default */
+      color:#fff;
+      padding:14px 16px;
+      text-align:center;
+      font-size:1.05em;
+      font-weight:700;
+      cursor:pointer;
+      z-index:9999;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.35);
     }
-    #live-banner:hover {
-      background: linear-gradient(135deg, #cc0000, #990000);
+    #live-banner .dot{
+      display:inline-block; width:10px; height:10px; border-radius:50%;
+      background:#9aa0aa; margin-right:8px; vertical-align:middle;
+    }
+    #live-banner.live{
+      background: linear-gradient(135deg,#ff0000,#cc0000);
+      box-shadow: 0 4px 18px rgba(255,0,0,0.55);
+      animation: pulse 2s infinite;
+    }
+    #live-banner.live .dot{
+      background:#ff3b3b; box-shadow:0 0 8px rgba(255,0,0,0.9);
+    }
+    #live-banner.offline{
+      background: linear-gradient(135deg,#333846,#262b39);
     }
 
     .header {
@@ -143,12 +154,14 @@
   </style>
 </head>
 <body>
-  <!-- Live Banner -->
+  <!-- Live Banner (sempre visibile) -->
   <div id="live-banner"
        role="button"
+       aria-live="polite"
        aria-label="Apri la live su YouTube"
-       onclick="window.open('https://www.youtube.com/@TheCapoBastoneChannel/live', '_blank')">
-    🔴 CAPO È IN LIVE! 🔴 Clicca per guardare!
+       onclick="window.open('https://www.youtube.com/channel/UC4NNAld3re9IODZFZbOBadg/live', '_blank', 'noopener,noreferrer')">
+    <span class="dot" aria-hidden="true"></span>
+    <span id="live-label">Capo non è in live — clicca per aprire</span>
   </div>
 
   <div class="container">
@@ -247,7 +260,6 @@
       </a>
     </div>
 
-    <!-- Supporta -->
     <div class="section">
       <h2>💰 Supporta</h2>
       <a href="https://streamlabs.com/thecapobastonechannel" class="btn" target="_blank" rel="noopener noreferrer">
@@ -296,29 +308,67 @@
       });
     });
 
-    // Banner live: per attivarlo in modo manuale, imposta a true
-    const SHOW_LIVE_BANNER_MANUAL = false;
-    if (SHOW_LIVE_BANNER_MANUAL) {
-      document.getElementById('live-banner').style.display = 'block';
+    /* ===========================
+       Live senza API/chiavi
+       - controllo via feed pubblico YouTube
+       - se LIVE => banner rosso
+       - altrimenti resta grigio
+       =========================== */
+    const CHANNEL_ID = 'UC4NNAld3re9IODZFZbOBadg';
+    const FEED_VIDEOS = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+    const FEED_LIVE   = `https://www.youtube.com/feeds/live_channel/${CHANNEL_ID}`;
+
+    const banner = document.getElementById('live-banner');
+    const label  = document.getElementById('live-label');
+
+    function setBanner(isLive){
+      banner.classList.toggle('live',    isLive);
+      banner.classList.toggle('offline', !isLive);
+      label.textContent = isLive
+        ? '🔴 CAPO È IN LIVE! 🔴 Clicca per guardare!'
+        : 'Capo non è in live — clicca per aprire';
     }
 
-    // Nota: il controllo "reale" dello stato live da front-end puro è limitato da CORS.
-    // Per un controllo affidabile usa un backend o la YouTube Data API (Search: eventType=live),
-    // poi mostra/nascondi il banner in base alla risposta.
-    async function checkLiveStatus() {
-      try {
-        // Placeholder: chiamata simbolica che non può leggere contenuto con no-cors
-        await fetch('https://www.youtube.com/@TheCapoBastoneChannel/live', { mode: 'no-cors' });
-        // Se arrivi qui la richiesta non è fallita, ma NON conferma che sia live.
-        // Lasciamo il banner nascosto a meno di conferma server-side/API.
-        // document.getElementById('live-banner').style.display = 'block';
-      } catch (e) {
-        console.log('Impossibile verificare lo stato live dal client:', e);
+    async function fetchText(url, timeoutMs = 7000){
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      try{
+        const res = await fetch(url, { signal: ctrl.signal, credentials: 'omit' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        return await res.text();
+      } finally {
+        clearTimeout(t);
       }
     }
-    // Esegui se vuoi un tentativo "best effort"
-    // checkLiveStatus();
-    // setInterval(checkLiveStatus, 300000); // ogni 5 minuti
+
+    async function checkLive(){
+      try{
+        // 1) feed generale: cerca <yt:liveBroadcastContent>live</yt:liveBroadcastContent>
+        const txt = await fetchText(FEED_VIDEOS);
+        const liveTag = txt.match(/<yt:liveBroadcastContent>(.*?)<\/yt:liveBroadcastContent>/i);
+        if (liveTag && /live/i.test(liveTag[1])) {
+          setBanner(true);
+          return;
+        }
+        // 2) fallback: feed live-only, live => presenza di <entry>
+        try{
+          const txt2 = await fetchText(FEED_LIVE);
+          const isLive = /<entry[\s>]/i.test(txt2);
+          setBanner(isLive);
+        }catch{
+          setBanner(false);
+        }
+      }catch{
+        // in caso di errore di rete lasciamo lo stato attuale
+      }
+    }
+
+    // Avvio e polling (puoi alzare a 120000 o 300000 per ridurre le richieste)
+    document.addEventListener('DOMContentLoaded', () => {
+      banner.classList.add('offline'); // stato iniziale
+      checkLive();
+      setInterval(checkLive, 60000);
+    });
   </script>
 </body>
 </html>
